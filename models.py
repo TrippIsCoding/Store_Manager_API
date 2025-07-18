@@ -9,6 +9,8 @@ class ItemModel(BaseModel):
     in_stock: Annotated[int, Field(ge=1, le=100000)]
 
 class Item(Base):
+    __tablename__ = "inventory"
+
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     name = Column(String, index=True, unique=True)
     price = Column(Float)
