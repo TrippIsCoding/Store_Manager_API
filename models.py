@@ -1,7 +1,11 @@
 from sqlalchemy import String, Integer, Float, Column
 from pydantic import BaseModel, Field
-from typing import Annotated
+from typing import Annotated, Literal
 from database import Base
+
+class UpdateItemModel(BaseModel):
+    price: Annotated[float, Field(le=100000, ge=.01)]
+    in_stock: Annotated[int, Field(ge=1, le=100000)]
 
 class ItemModel(BaseModel):
     name: Annotated[str, Field(min_length=2, max_length=80)]
