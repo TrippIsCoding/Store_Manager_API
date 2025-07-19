@@ -9,7 +9,7 @@ manager_router = APIRouter(prefix='/inventory')
 async def view_inventory(db: session = Depends(get_db)):
     inventory = db.query(Item).all()
 
-    return ({'id': item.id, 'name': item.name, 'price': item.price, 'in_stock': item.in_stock} for item in inventory)
+    return [{'id': item.id, 'name': item.name, 'price': item.price, 'in_stock': item.in_stock} for item in inventory]
 
 @manager_router.post('/add')
 async def add_to_inventory(new_item: ItemModel = Depends(), db: session = Depends(get_db)):

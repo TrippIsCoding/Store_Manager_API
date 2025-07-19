@@ -1,4 +1,3 @@
-TBD.txt
-.env
-/env
 /__pycache__
+/env
+.env
