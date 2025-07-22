@@ -1,3 +1,4 @@
-/__pycache__
+/Manager_API/__pycache__
+/User_API/__pycache__
 /env
 .env

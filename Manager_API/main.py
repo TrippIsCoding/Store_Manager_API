@@ -1,5 +1,5 @@
 from fastapi import FastAPI
-from database import Base, engine
+from shared_files.database import Base, engine
 from manager_crud import manager_router
 
 app = FastAPI()

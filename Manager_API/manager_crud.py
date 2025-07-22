@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
-from models import UpdateItemModel, ItemModel, Item
+from shared_files.models import UpdateItemModel, ItemModel, Item
 from sqlalchemy.orm import session
-from database import get_db
+from shared_files.database import get_db
 
 manager_router = APIRouter(prefix='/inventory')
 
