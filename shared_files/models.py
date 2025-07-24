@@ -1,7 +1,7 @@
 from sqlalchemy import String, Integer, Float, Column
 from pydantic import BaseModel, Field
 from typing import Annotated
-from database import Base
+from shared_files.database import Base
 
 class UpdateItemModel(BaseModel):
     price: Annotated[float, Field(le=100000, ge=.01)]

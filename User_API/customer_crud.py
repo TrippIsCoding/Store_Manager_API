@@ -1,9 +1,50 @@
 from fastapi import APIRouter, HTTPException, Depends
 from shared_files.database import get_db, r
 from sqlalchemy.orm import session
+from shared_files.models import Item
+from User_API.auth import oauth2_scheme, verify_token
+import json
 
 customer_router = APIRouter()
 
 @customer_router.get('/')
 async def view_store(db: session = Depends(get_db)):
+    inventory = db.query(Item).all()
+
+    if not inventory:
+        raise HTTPException(status_code=404, detail="There are no items in inventory right now. Please come back later.")
     
+    return [{'name': item.name, 'price': f'${item.price}', 'in_stock': item.in_stock} for item in inventory]
+
+@customer_router.post('/cart/add/{id}')
+async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session = Depends(get_db)):
+    user_info = verify_token(token)
+    cart_key = f'cart:{user_info['sub']}{user_info['user_id']}'
+
+    item = db.query(Item).filter(Item.id==id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail=f'There is no item with the id: {id}')
+
+    try:
+        if existing_item := r.hget(cart_key, item.id):
+            item_info = json.loads(existing_item)
+            item_info['quantity'] = item_info.get('quantity', 1) + 1
+
+        else:
+            item_info = {
+                'name': item.name,
+                'price': item.price,
+                'quantity': 1
+            }
+
+        r.hset(cart_key, item.id, json.dumps(item_info))
+        r.expire(cart_key, 86400)
+    except:
+        raise HTTPException(status_code=500, detail=f'There was a problem adding {item.name} to cart. Please try again later.')
+    
+    return {'message': f'Item {item.name} was added to cart!'}
+
+@customer_router.get('/view/cart')
+async def view_cart():
+    pass
