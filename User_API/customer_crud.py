@@ -10,7 +10,7 @@ def get_cart_key(username: str, id: int):
 
 customer_router = APIRouter()
 
-@customer_router.get('/')
+@customer_router.get('/view/store')
 async def view_store(db: session = Depends(get_db)):
     inventory = db.query(Item).all()
 
@@ -36,6 +36,7 @@ async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session 
 
         else:
             item_info = {
+                'id': item.id,
                 'name': item.name,
                 'price': item.price,
                 'quantity': 1
@@ -56,3 +57,21 @@ async def view_cart(token: str = Depends(oauth2_scheme), db: session = Depends(g
     cart = r.hgetall(cart_key)
 
     return [json.loads(cart[id]) for id in cart]
+
+@customer_router.delete('/cart/delete/{id}')
+async def remove_item_from_cart(id: int, token: str = Depends(oauth2_scheme)):
+    user_info = verify_token(token)
+    cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
+
+    item = json.loads(r.hget(cart_key, id))
+
+    try:
+        if item['quantity'] > 1:
+            item['quantity'] = item.get('quantity', 1) - 1
+            r.hset(cart_key, id, json.dumps(item))
+        else:
+            r.hdel(cart_key, id)
+    except:
+        raise HTTPException(status_code=500, detail='Could not delete item from the cart. Please try again later.')
+
+    return {'message': f'The item was removed from your cart.'}
