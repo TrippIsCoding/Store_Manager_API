@@ -30,7 +30,7 @@ async def update_item(id: int, updated_item: UpdateItemModel = Depends(), db: se
     item = db.query(Item).filter(Item.id==id).first()
 
     if not item:
-        raise HTTPException(status_code=404, detail=f'Item {id} could not be found.')
+        raise HTTPException(status_code=404, detail=f'Item {id} not found.')
 
     item.price = updated_item.price
     item.in_stock = updated_item.in_stock
@@ -43,6 +43,9 @@ async def update_item(id: int, updated_item: UpdateItemModel = Depends(), db: se
 @manager_router.delete('/delete/{id}')
 async def delete_item(id: int, db: session = Depends(get_db)):
     item = db.query(Item).filter(Item.id==id).first()
+
+    if not item:
+        raise HTTPException(status_code=404, detail=f'Item {id} not found')
 
     db.delete(item)
     db.commit()

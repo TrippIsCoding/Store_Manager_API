@@ -5,6 +5,9 @@ from shared_files.models import Item
 from User_API.auth import oauth2_scheme, verify_token
 import json
 
+def get_cart_key(username: str, id: int):
+    return f'cart:{username}_{id}'
+
 customer_router = APIRouter()
 
 @customer_router.get('/')
@@ -19,7 +22,7 @@ async def view_store(db: session = Depends(get_db)):
 @customer_router.post('/cart/add/{id}')
 async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session = Depends(get_db)):
     user_info = verify_token(token)
-    cart_key = f'cart:{user_info['sub']}{user_info['user_id']}'
+    cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
 
     item = db.query(Item).filter(Item.id==id).first()
 
@@ -43,8 +46,13 @@ async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session 
     except:
         raise HTTPException(status_code=500, detail=f'There was a problem adding {item.name} to cart. Please try again later.')
     
-    return {'message': f'Item {item.name} was added to cart!'}
+    return {'message': f'Item: {item.name} was added to cart!'}
 
-@customer_router.get('/view/cart')
-async def view_cart():
-    pass
+@customer_router.get('/cart/view')
+async def view_cart(token: str = Depends(oauth2_scheme), db: session = Depends(get_db)):
+    user_info = verify_token(token)
+    cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
+
+    cart = r.hgetall(cart_key)
+
+    return [json.loads(cart[id]) for id in cart]
