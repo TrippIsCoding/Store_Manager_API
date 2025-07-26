@@ -19,7 +19,7 @@ async def view_inventory(db: session = Depends(get_db)):
     inventory = db.query(Item).all()
 
     if not inventory:
-        raise HTTPException(status_code=404, detail='There are curerntly no items in inventory. Come back later.')
+        raise HTTPException(status_code=404, detail='There are currently no items in inventory. Come back later.')
 
     return [{'id': item.id, 'name': item.name, 'price': item.price, 'in_stock': item.in_stock} for item in inventory]
 
@@ -69,7 +69,7 @@ async def update_item(id: int, updated_item: UpdateItemModel, db: session = Depe
     db.commit()
     db.refresh(item)
 
-    return {'id': item.id, 'message': f'Item {item.name} has been updated with the provded info.'}
+    return {'id': item.id, 'message': f'Item {item.name} has been updated with the provided info.'}
 
 @manager_router.delete('/delete/{id}')
 async def delete_item(id: int, db: session = Depends(get_db)):
