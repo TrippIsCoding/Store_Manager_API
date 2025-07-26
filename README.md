@@ -13,7 +13,7 @@ Both APIs share a PostgreSQL database and the User API uses Redis for cart stora
 
 ## Live Deployment
 
-- **Manager API**: https://store-manager-api.onrender.com
+- **Manager API**: https://store-manager-api.onrender.com/docs
 - **User API**: https://store-user-api.onrender.com/docs
 
 ## Tech Stack
