@@ -1,7 +1,7 @@
 import os
 from dotenv import load_dotenv
 
-if os.getenv('RENDER') != True:
+if os.getenv('RENDER') != True: # this if statement is for the deployed api on render to load the env variables.
     load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")

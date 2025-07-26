@@ -6,12 +6,18 @@ from User_API.auth import oauth2_scheme, verify_token
 import json
 
 def get_cart_key(username: str, id: int):
+    '''
+    get_cart_key is returning the key i use for people's cart in the redis cache
+    '''
     return f'cart:{username}_{id}'
 
 customer_router = APIRouter()
 
 @customer_router.get('/view/store')
 async def view_store(db: session = Depends(get_db)):
+    '''
+    /view/store endpoint returns a list with a nested dictionary with every item in the stores inventory
+    '''
     inventory = db.query(Item).all()
 
     if not inventory:
@@ -21,6 +27,11 @@ async def view_store(db: session = Depends(get_db)):
 
 @customer_router.post('/cart/add/{id}')
 async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session = Depends(get_db)):
+    '''
+    /cart/add/{id} is being used to allow the user to add an item to there cart.
+    cart items are saved to a redis cache so they can be quickly retrieved and updated.
+    every cart expires after 24 hours of inactivity aswell.
+    '''
     user_info = verify_token(token)
     cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
 
@@ -50,7 +61,11 @@ async def add_to_cart(id: int, token: str = Depends(oauth2_scheme), db: session 
     return {'message': f'Item: {item.name} was added to cart!'}
 
 @customer_router.get('/cart/view')
-async def view_cart(token: str = Depends(oauth2_scheme), db: session = Depends(get_db)):
+async def view_cart(token: str = Depends(oauth2_scheme)):
+    '''
+    /cart/view endpoint allows the user to see whats in there cart.
+    this function returns every item in the users cart in a list with nested dictionaries.
+    '''
     user_info = verify_token(token)
     cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
 
@@ -60,6 +75,10 @@ async def view_cart(token: str = Depends(oauth2_scheme), db: session = Depends(g
 
 @customer_router.delete('/cart/delete/{id}')
 async def remove_item_from_cart(id: int, token: str = Depends(oauth2_scheme)):
+    '''
+    /cart/delete/{id} endpoint deletes a specific item from a users cart unless they have 
+    more than 2 of an item in there cart then it will remove 1 item from the total quantity.
+    '''
     user_info = verify_token(token)
     cart_key = get_cart_key(user_info['sub'], user_info['user_id'])
 
