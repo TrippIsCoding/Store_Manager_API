@@ -12,7 +12,7 @@ r = redis.Redis(host=REDIS_HOST_URL, port=13001, decode_responses=True, username
 
 def get_db():
     '''
-    I'm using get_db for dependency injection in the endpoints to access the database.
+    Used for dependency injection in the endpoints to access the database.
     '''
     db = SessionLocal()
 

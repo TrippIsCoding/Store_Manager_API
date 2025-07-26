@@ -21,8 +21,10 @@ def verify_password(password: str, hashed_password: str):
 
 def verify_token(token: str):
     '''
-    verify_token verifies the users jwt if its not a valid jwt it raises a 401 status code 
-    this function also return the decoded jwt so i can get user info like user id and username from it
+    Verify JWT token and return decoded user information.
+    
+    Raises:
+        HTTPException: 401 if token is invalid or expired.
     '''
     try:
         user = jwt.decode(token, SECRET_KEY, algorithms=ALGORITHM)
@@ -36,7 +38,13 @@ auth_router = APIRouter()
 @auth_router.post('/user/signup')
 async def create_account(user: User, db: Session = Depends(get_db)):
     '''
-    create_account allows users to sign up storing thier username, password, email, and full name in the database for future login
+    Create a new user account with hashed/salted password.
+    
+    Args:
+        user: User registration data with username, password, email, full name, and address.
+        
+    Raises:
+        HTTPException: 422 if email is invalid, 409 if username/email exists.
     '''
     try:
         validate_email(user.email)
@@ -63,7 +71,16 @@ async def create_account(user: User, db: Session = Depends(get_db)):
 @auth_router.post('/user/login')
 async def user_authenticate(user: OAuth2PasswordRequestForm = Depends(), db: Session = Depends(get_db)):
     '''
-    user_authenticate returns a jwt if the user info is valid
+    Authenticate user and return JWT token.
+    
+    Args:
+        user: Login form with username and password.
+        
+    Returns:
+        JWT token valid for 30 minutes.
+        
+    Raises:
+        HTTPException: 404 if user not found, 401 if password is incorrect.
     '''
     user_info = db.query(UserModel).filter(UserModel.username==user.username).first()
     if not user_info:

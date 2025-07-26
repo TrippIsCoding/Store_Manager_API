@@ -8,8 +8,13 @@ manager_router = APIRouter(prefix='/inventory')
 @manager_router.get('/view')
 async def view_inventory(db: session = Depends(get_db)):
     '''
-    the /view endpoint retrieves every item in the store and returns it in a dictionary 
-    example: id, name, price, in_stock
+    Retrieve all items in the store inventory.
+    
+    Returns:
+        List of inventory items with id, name, price, and stock quantity.
+        
+    Raises:
+        HTTPException: 404 if inventory is empty.
     '''
     inventory = db.query(Item).all()
 
@@ -21,7 +26,13 @@ async def view_inventory(db: session = Depends(get_db)):
 @manager_router.post('/add')
 async def add_to_inventory(new_item: ItemModel, db: session = Depends(get_db)):
     '''
-    the /add endpoint allows the store manager to add items to the stores inventory which can then be viewed by customers.
+    Add a new item to store inventory.
+    
+    Args:
+        new_item: Item data with name, price, and stock quantity.
+        
+    Returns:
+        Success message confirming item addition.
     '''
     add_new_item = Item(
         name=new_item.name,
@@ -38,7 +49,14 @@ async def add_to_inventory(new_item: ItemModel, db: session = Depends(get_db)):
 @manager_router.put('/update/{id}')
 async def update_item(id: int, updated_item: UpdateItemModel, db: session = Depends(get_db)):
     '''
-    the /update/{id} endpoint allows the store manager to update an existing items price and the amount in stock whenever they want.
+    Update an existing item's price and stock quantity.
+    
+    Args:
+        id: Item ID to update.
+        updated_item: New price and stock data.
+        
+    Raises:
+        HTTPException: 404 if item not found.
     '''
     item = db.query(Item).filter(Item.id==id).first()
 
@@ -56,7 +74,13 @@ async def update_item(id: int, updated_item: UpdateItemModel, db: session = Depe
 @manager_router.delete('/delete/{id}')
 async def delete_item(id: int, db: session = Depends(get_db)):
     '''
-    the /delete/{id} endpoint allows the store manager to delete an existing item from the stores inventory.
+    Remove an item from inventory.
+    
+    Args:
+        id: Item ID to delete.
+        
+    Raises:
+        HTTPException: 404 if item not found.
     '''
     item = db.query(Item).filter(Item.id==id).first()
 
